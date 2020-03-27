@@ -20,9 +20,23 @@ class CasasApiController extends Controller
      */
     public function index(Request $request)
     {
+        //cada respuesta regresa 20 casas
+        $paginaActual = intval($request->input('pagina'));
+        if (!$paginaActual) {
+            $paginaActual = 1;
+        }
+
+        $numeroCasas = Casa::count();
+        $numeroPaginas = ceil($numeroCasas / 20);
+        $casas = Casa::where('id_user',$request->user()->id)->skip(($paginaActual - 1) * 20)->take(20)->get();
         
-        $casas = Casa::where('id_user',$request->user()->id)->get();
-        return $casas;
+        $respuesta = array();
+        $respuesta['total'] = $numeroCasas;
+        $respuesta['paginas'] = $numeroPaginas;
+        $respuesta['pagina_actual'] = $paginaActual;
+        $respuesta['casas'] = $casas;
+
+        return $respuesta;
     }
 
     /**
